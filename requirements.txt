@@ -1,0 +1,9 @@
+beautifulsoup4==4.6.3
+blessings==1.7
+boltons==18.0.1
+Click==7.0
+html5lib==1.0.1
+lxml==4.2.5
+selenium==3.8.1
+six==1.11.0
+webencodings==0.5.1
