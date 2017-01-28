@@ -6,6 +6,12 @@ sudo apt-get install libxslt-dev python3-dev
 
 ## Usage
 
+- Use Python3
+- To remove `done-` prefix.(-maxdepth 1: no search sub-directory)
+- File Name with space become wrap.
+- Ref: http://askubuntu.com/questions/343727/filenames-with-spaces-breaking-for-loop-find-command
+- Ref: http://stackoverflow.com/questions/8759285/alternatives-to-xargs-l
+
 ```
 find . -maxdepth 1 -name "done-*" | while read i; do mv "$i" "`echo "\"$i\"" | sed \"s/done-//g\"`"; done
 ```
@@ -21,16 +27,11 @@ find . -maxdepth 1 -name "done-*" | while read i; do mv "$i" "`echo "\"$i\"" | s
 PROXY=true ./miaoshuwuDownloader.py
 ```
 
-- Load local file named ends with `*.txt` and skip file named starts with `done-*`.
+- Switch HTML Parser Mode using `TXTMODE`
 
 ```
-./txtUtils.py
+TXTMODE=6 ./txtUtils.py
 ```
-
-## Plan
-
-- Refactor previous implementation with class base.
-- Refactor `lib/*`
 
 ## Troubleshooting
 
@@ -39,4 +40,3 @@ PROXY=true ./miaoshuwuDownloader.py
 ```
 export PIP_DEFAULT_TIMEOUT=100
 ```
-

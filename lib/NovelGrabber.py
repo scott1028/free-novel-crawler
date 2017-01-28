@@ -53,11 +53,7 @@ class NovelGrabber(metaclass=abc.ABCMeta):
         buf_pool = parallel_handle(getContent, url_pool, 20)
         idx = 1
         with open('done-%s-%s.txt' % (title, T), 'w') as fd:
-            j = 0
-            while len(buf_pool) > j:
-                # for buf in buf_pool:
-                buf = buf_pool[j]
-                j += 1
+            for buf in buf_pool:
                 buf = buf.decode(self.TXTENCODE, 'ignore')
                 reg_content = self.get_novel_content_reg()
                 reg_content_matched = reg_content.search(buf)
@@ -66,16 +62,6 @@ class NovelGrabber(metaclass=abc.ABCMeta):
                     fd.write('\r\n第%s回\r\n' % idx)
                     fd.write(buf)
                     idx += 1
-                # this part handle pagination in content buffer
-                next_page_reg = self.get_novel_content_next_page_url_req()
-                if next_page_reg != None:
-                    next_page_url = next_page_reg.search(buf)
-                    import pdb; pdb.set_trace()
-                    if next_page_url != None:
-                        import pdb; pdb.set_trace()
-                        next_page_buf = parallel_handle(getContent, [next_page_url.group('url')], 20)[0]
-                        import pdb; pdb.set_trace()
-                        buf_pool.insert(j, next_page_buf)
 
     @abc.abstractmethod
     def get_title_reg(self):
@@ -112,6 +98,3 @@ class NovelGrabber(metaclass=abc.ABCMeta):
         # reg_content = re.compile(u'<div.*?class.*?=.*?"content".*?>(?P<content>.*?)<div.*?class.*?=.*?"notice">', re.DOTALL)
         # return reg_content
         raise Exception('Not implemented for each content of chapter')
-
-    def get_novel_content_next_page_url_req(self):
-        return None

@@ -99,13 +99,10 @@ def content_handle(buf, treat_as_pure_text=os.environ.get('TXTMODE', '5').upper(
     buf = re.sub(r'(?:‥|…)+\n(?:‥|…)+', '…', buf, flags=re.DOTALL)
     buf = re.sub(r'(?:\t)+', '', buf, flags=re.MULTILINE)
     buf = re.sub(r'(?: )+$', '', buf, flags=re.MULTILINE)
-
     # NOTE: remove duplicated symbol
     buf = re.sub(r'((?:﹖|﹗|。|？|！))(?=\1)', '', buf, flags=re.DOTALL)
-
     # NOTE: add wrap after those symbol
-    # buf = re.sub(r'((?:﹖|﹗|。|？|！))', '\g<0>\r\n', buf, flags=re.DOTALL)
-
+    buf = re.sub(r'((?:﹖|﹗|。|？|！))', '\g<0>\r\n', buf, flags=re.DOTALL)
     # NOTE: remove duplicated wrap
     buf = re.sub(r'((?:\r*\n))+', '\g<1>', buf, flags=re.DOTALL)
 
@@ -155,7 +152,7 @@ def parallel_handle(returnable_func=lambda x: x, input_array=[], worker_num=6, t
         results.append(result)
     pool.close()
     pool.join()
-    return [result.get(timeout=timeout) for result in results]
+    return iter([result.get(timeout=timeout) for result in results])
 
     # Old Version, cause futex deadLock sometime
     # pool = multiprocessing.pool.ThreadPool(worker_num)
