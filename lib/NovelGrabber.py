@@ -34,6 +34,22 @@ class NovelGrabber(metaclass=abc.ABCMeta):
         pass
 
     def run(self):
+        def parse_content(buf):
+            reg_content = self.get_novel_content_reg()
+            reg_content_matched = reg_content.search(buf)
+            return reg_content_matched
+        
+        def write_content(matched_content, idx, sub_idx = ''):
+            if reg_content_matched != None:
+                buf = content_handle(matched_content.group('content'))
+                fd.write('\r\n第%s回' % idx)
+                if sub_idx != '':
+                    fd.write(' - %s' % sub_idx)
+                fd.write('\r\n')
+                fd.write(buf)
+                return True
+            return False
+
         LOG(self.tip)
         url = input('target url?')
         retrive_start = input('Get From [n:]? ( To skip when you type empty string, `-5 -> [-5:]` ) ')
@@ -45,22 +61,44 @@ class NovelGrabber(metaclass=abc.ABCMeta):
         reg_title = self.get_title_reg()
         title = reg_title.search(buf).group('title')
         reg_article = self.get_article_area_reg()
+        # import pdb; pdb.set_trace()
         buf = reg_article.search(buf).group('article')
         reg_url = self.get_chapter_urls_reg()
         base_url = self.get_base_novel_link_url_prefix(url)
         url_pool = ['%s%s' % (base_url, i.group('url')) for i in reg_url.finditer(buf)]
+        if self.url_pool_filter() != None:
+            url_pool = [i for i in url_pool if self.url_pool_filter().match(i) == None]
+        # url_pool = url_pool[0:10]
         url_pool = url_pool[retrive_start:]
         buf_pool = parallel_handle(getContent, url_pool, 20)
         idx = 1
         with open('done-%s-%s.txt' % (title, T), 'w') as fd:
             for buf in buf_pool:
+                sub_idx = 1
                 buf = buf.decode(self.TXTENCODE, 'ignore')
-                reg_content = self.get_novel_content_reg()
-                reg_content_matched = reg_content.search(buf)
-                if reg_content_matched != None:
-                    buf = content_handle(reg_content_matched.group('content'))
-                    fd.write('\r\n第%s回\r\n' % idx)
-                    fd.write(buf)
+                reg_content_matched = parse_content(buf)
+                if write_content(reg_content_matched, idx):
+                    # NOTE: try flip page
+                    try:
+                        req_next_page_url = self.get_next_page_req()
+                        matched_next_page_url = req_next_page_url.search(buf)
+                        next_page_url = None
+                        if matched_next_page_url != None:
+                            next_page_url = matched_next_page_url.group('url')
+                            print('next_page_url:' + next_page_url)
+                        while next_page_url != None:
+                            sub_buf = [val for val in parallel_handle(getContent, [self.get_base_novel_link_url_prefix(url) + next_page_url], 1)][0]
+                            sub_buf = sub_buf.decode(self.TXTENCODE, 'ignore')
+                            sub_reg_content_matched = parse_content(sub_buf)
+                            write_content(sub_reg_content_matched, idx, sub_idx)
+                            next_page_url = self.get_next_page_req()
+                            matched_next_page_url = req_next_page_url.search(sub_buf)
+                            next_page_url = None
+                            if matched_next_page_url != None:
+                                next_page_url = matched_next_page_url.group('url')
+                            sub_idx += 1
+                    except Exception as e:
+                        print(e)
                     idx += 1
 
     @abc.abstractmethod
@@ -98,3 +136,11 @@ class NovelGrabber(metaclass=abc.ABCMeta):
         # reg_content = re.compile(u'<div.*?class.*?=.*?"content".*?>(?P<content>.*?)<div.*?class.*?=.*?"notice">', re.DOTALL)
         # return reg_content
         raise Exception('Not implemented for each content of chapter')
+
+    # NOTE: [OPTIONAL] if this novel has next page in sampe chapter, return this URL
+    def get_next_page_req(self):
+        return None
+
+    # NOTE: [OPTIONAL] if this novel has next page in sampe chapter, return this URL
+    def url_pool_filter(self):
+        return None
