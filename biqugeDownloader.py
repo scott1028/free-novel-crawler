@@ -19,12 +19,15 @@ class BiqugeNovelGrabber(NovelGrabber):
         reg_url = re.compile(u'<dd>.*?<a.*?href.*?="(?P<url>.*?)".*?>.*?</dd>', re.MULTILINE)
         return reg_url
 
+    def get_base_novel_link_url_prefix(self, url = None):
+        return url
+
     def get_novel_content_reg(self):
         reg_content = re.compile(u'<div id="content".*?>(?P<content>.*?)</div>', re.DOTALL)
         return reg_content
 
 if __name__ == "__main__":
-    default_encode = 'utf-8'
+    default_encode = 'gbk'
     encode = input(f'encode? (default: {default_encode})') or default_encode
     print('encode:', encode)
-    BiqugeNovelGrabber(TXTENCODE=encode, tip='ex: https://www.biquge.com.cn/book/31444/').run()
+    BiqugeNovelGrabber(TXTENCODE=encode, tip='ex: https://www.xbiquge.so/book/33615/').run()
