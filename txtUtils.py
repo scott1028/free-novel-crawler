@@ -6,7 +6,8 @@ from lib import *
 
 @click.command()
 @click.option('--mode', default=2, help='TXTMODE for handle content. DEFAULT=2')
-def main(mode):
+@click.option('--chapter_type', default='text', help='chapterType looked on line. DEFAULT=text')
+def main(mode, chapter_type):
     """A TXT CLI Tool for handling novel content."""
     txtencode = input('encoding?')
     concat = input('concat?').upper()
@@ -26,7 +27,7 @@ def main(mode):
             with open(f, 'rb') as fd:
                 buf = fd.read().decode(txtencode, 'ignore')
                 LOG('[BUF][Start] %s' % len(buf))
-                buf = content_handle(buf, treat_as_pure_text=str(mode))
+                buf = content_handle(buf, treat_as_pure_text=str(mode), chapterType=chapter_type)
                 LOG('[BUF][End] %s' % len(buf))
                 if concat == 'N':
                     with open('done-%s-%s%s' % (avaliable_matched.group('title'), T, avaliable_matched.group('ext')), 'w') as fd2:

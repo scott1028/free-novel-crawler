@@ -22,7 +22,7 @@ import click
 
 t = Terminal()
 
-def content_handle(buf, treat_as_pure_text=os.environ.get('TXTMODE', '5').upper()):
+def content_handle(buf, treat_as_pure_text=os.environ.get('TXTMODE', '5').upper(), chapterType='text'):
     def _content_handle(buf, escape=False):
         LOG('MODE: %s' % treat_as_pure_text)
         buf = re.sub('<script.*?</script>', '', buf, flags=re.DOTALL)
@@ -125,7 +125,7 @@ def content_handle(buf, treat_as_pure_text=os.environ.get('TXTMODE', '5').upper(
         else:
             return ''
 
-    def _content_modifier(buf):
+    def _content_modifier(buf, chapterType):
         def handler(char):
             try:
                 chapterNo = char.group('chapterNo')
@@ -133,14 +133,16 @@ def content_handle(buf, treat_as_pure_text=os.environ.get('TXTMODE', '5').upper(
             except Exception as e:
                 return char.group(0)
             return f'第{chapterNo}章 {chapterName}'
-
-        pattern = r'^(?P<chapterNo>\d+) (?P<chapterName>.*)\n'
-        buf = re.sub(pattern, handler, buf, flags=re.MULTILINE)
+        if chapterType == 'number':
+            buf = re.sub(r'(?P<chapterNum>\d+)\r?\n', r'\n\n第\g<chapterNum>章\n\n', buf, flags=re.MULTILINE)
+        else:
+            pattern = r'^(?P<chapterNo>\d+) (?P<chapterName>.*)\n'
+            buf = re.sub(pattern, handler, buf, flags=re.MULTILINE)
         return buf
     buf = re.sub(r'(?:.)', _filter_unicode, buf, flags=re.MULTILINE)
     sto_pattern = r'每一天新文都需要大家的支持才能成長起來，求推薦，求留言，感謝大家的支持|本作品由思兔網提供下載與在線閱讀|思兔網文檔下載與在線閱讀|思兔文檔共享與在線閱讀|思兔在線閱讀|本作品由思兔在線閱讀網友整理上傳|思兔網|\(猫扑中文 www\.mpzw\.com\)|猫扑中文|www\.mpzw\.com|'
     buf = re.sub(re.compile(sto_pattern, re.DOTALL), '', buf)
-    buf = _content_modifier(buf)
+    buf = _content_modifier(buf, chapterType)
     buf = '\r\n%s\r\n' % buf
     # NOTE: add final wrap and avoid duplicated wrap at the end of content
     return re.sub(r'((?:\r*\n))+$', '\r\n', buf, flags=re.MULTILINE)
