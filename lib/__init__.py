@@ -23,7 +23,7 @@ import click
 t = Terminal()
 
 def content_handle(buf, treat_as_pure_text=os.environ.get('TXTMODE', '5').upper(), chapterType='text'):
-    def _content_handle(buf, escape=False):
+    def _content_handle(buf):
         LOG('MODE: %s' % treat_as_pure_text)
         buf = re.sub('<script.*?</script>', '', buf, flags=re.DOTALL)
         buf = re.sub('<style.*?</style>', '', buf, flags=re.DOTALL)
@@ -82,17 +82,18 @@ def content_handle(buf, treat_as_pure_text=os.environ.get('TXTMODE', '5').upper(
         buf = re.sub(r'(?:\r)', '', buf)
         buf = re.sub(r'(?:\.)+\n(?:\.)+', '...', buf, flags=re.DOTALL)
         buf = re.sub('< */ *(.*?)>', '', buf, flags=re.DOTALL)
-        return buf, escape
-    escape = True
+        return buf
+
+    # Handle continuously until no any removable character exists inside buf
     prev = ''
-    buf, escape = _content_handle(buf, True)
     curr = buf
     while prev != curr:
         LOG('prev: %s' % len(prev))
-        prev = buf
-        buf, escape = _content_handle(buf, escape)
-        curr = buf
+        prev = curr
+        curr = _content_handle(curr)
         LOG('curr: %s' % len(curr))
+    buf = curr
+
     # Invoked only once#1
     buf = re.sub(r'(?:\n\.\n)', '\n...\n', buf)
     buf = re.sub(r'(?:\.)+(.)', r'.\1', buf)
@@ -102,9 +103,6 @@ def content_handle(buf, treat_as_pure_text=os.environ.get('TXTMODE', '5').upper(
 
     # NOTE: remove duplicated symbol
     buf = re.sub(r'((?:﹖|﹗|。|？|！))(?=\1)', '', buf, flags=re.DOTALL)
-
-    # NOTE: add wrap after those symbol
-    # buf = re.sub(r'((?:﹖|﹗|。|？|！))', '\g<0>\r\n', buf, flags=re.DOTALL)
 
     # NOTE: remove duplicated wrap
     buf = re.sub(r'((?:\r*\n))+', '\g<1>', buf, flags=re.DOTALL)
@@ -125,6 +123,13 @@ def content_handle(buf, treat_as_pure_text=os.environ.get('TXTMODE', '5').upper(
         else:
             return ''
 
+    buf = re.sub(r'(?:.)', _filter_unicode, buf, flags=re.MULTILINE)
+
+    # sto website special rule
+    sto_pattern = r'每一天新文都需要大家的支持才能成長起來，求推薦，求留言，感謝大家的支持|本作品由思兔網提供下載與在線閱讀|思兔網文檔下載與在線閱讀|思兔文檔共享與在線閱讀|思兔在線閱讀|本作品由思兔在線閱讀網友整理上傳|思兔網|\(猫扑中文 www\.mpzw\.com\)|猫扑中文|www\.mpzw\.com|'
+    buf = re.sub(re.compile(sto_pattern, re.DOTALL), '', buf)
+
+    # Attach chapter words
     def _content_modifier(buf, chapterType):
         def handler(char):
             try:
@@ -139,11 +144,10 @@ def content_handle(buf, treat_as_pure_text=os.environ.get('TXTMODE', '5').upper(
             pattern = r'^(?P<chapterNo>\d+) (?P<chapterName>.*)\n'
             buf = re.sub(pattern, handler, buf, flags=re.MULTILINE)
         return buf
-    buf = re.sub(r'(?:.)', _filter_unicode, buf, flags=re.MULTILINE)
-    sto_pattern = r'每一天新文都需要大家的支持才能成長起來，求推薦，求留言，感謝大家的支持|本作品由思兔網提供下載與在線閱讀|思兔網文檔下載與在線閱讀|思兔文檔共享與在線閱讀|思兔在線閱讀|本作品由思兔在線閱讀網友整理上傳|思兔網|\(猫扑中文 www\.mpzw\.com\)|猫扑中文|www\.mpzw\.com|'
-    buf = re.sub(re.compile(sto_pattern, re.DOTALL), '', buf)
+
     buf = _content_modifier(buf, chapterType)
     buf = '\r\n%s\r\n' % buf
+
     # NOTE: add final wrap and avoid duplicated wrap at the end of content
     return re.sub(r'((?:\r*\n))+$', '\r\n', buf, flags=re.MULTILINE)
 
