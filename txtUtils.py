@@ -11,7 +11,7 @@ def main(mode, chapter_type):
     """A TXT CLI Tool for handling novel content."""
     txtencode = input('encoding?')
     concat = input('concat?').upper()
-    h = HTMLParser()
+    h = html
     t = str(int(time.time()))
 
     files = [f for f in os.listdir('.') if os.path.isfile(f)]

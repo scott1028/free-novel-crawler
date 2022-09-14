@@ -6,7 +6,8 @@ from bs4 import BeautifulSoup
 
 import abc
 import re
-from html.parser import HTMLParser
+# from html.parser import HTMLParser
+import html
 from urllib import request as urllib2
 import urllib, socket
 import http.cookiejar
@@ -318,7 +319,7 @@ def generateProxyList():
 CJ = http.cookiejar.CookieJar()
 OPENER = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(CJ))
 T = str(int(time.time()))
-H = HTMLParser()
+H = html
 
 flag = os.environ.get('PROXY', 'false').upper()
 if flag == 'TRUE':
