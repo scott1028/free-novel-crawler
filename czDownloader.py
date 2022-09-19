@@ -8,11 +8,11 @@ from lib.NovelGrabber import NovelGrabber
 
 class CzNovelGrabber(NovelGrabber):
     def get_title_reg(self):
-        reg_title = re.compile(r'<span.*?class.*?=.*?"title">(?P<title>.*?)</span>', re.DOTALL)
+        reg_title = re.compile(r'<span class="title">(?P<title>.*?)</span>', re.DOTALL)
         return reg_title
 
     def get_article_area_reg(self):
-        reg_article = re.compile(u'<ul.*?class.*?=.*?"nav chapter-list">.*?(?P<article>.*?)</ul>', re.DOTALL)
+        reg_article = re.compile(u'<ul.*?id="chapter-list".*?>.*?(?P<article>.*?)</ul>', re.DOTALL)
         return reg_article
 
     def get_chapter_urls_reg(self):
