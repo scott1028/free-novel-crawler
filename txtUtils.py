@@ -1,7 +1,16 @@
 #!/usr/bin/env python3
-# coding: utf
+# coding: utf-8
 
-from lib import *
+import html
+import time
+import re
+import os
+
+import click
+
+from lib.textProcessor import content_handle
+from lib.logger import LOG
+from lib import T
 
 
 @click.command()

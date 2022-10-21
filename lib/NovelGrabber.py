@@ -1,7 +1,14 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
-from lib import *
+import abc
+import re
+
+from lib.textProcessor import content_handle
+from lib import getContent
+from lib import parallel_handle
+from lib import LOG
+from . import T
 
 # NOTE: issubclass(AnyClass(), NovelGrabber) ==> True / False
 # Ref: https://realpython.com/python-interface/#using-metaclasses
@@ -70,11 +77,8 @@ class NovelGrabber(metaclass=abc.ABCMeta):
                 next_page_reg = self.get_novel_content_next_page_url_req()
                 if next_page_reg != None:
                     next_page_url = next_page_reg.search(buf)
-                    import pdb; pdb.set_trace()
                     if next_page_url != None:
-                        import pdb; pdb.set_trace()
                         next_page_buf = parallel_handle(getContent, [next_page_url.group('url')], 20)[0]
-                        import pdb; pdb.set_trace()
                         buf_pool.insert(j, next_page_buf)
 
     @abc.abstractmethod
