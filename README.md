@@ -40,3 +40,8 @@ PROXY=true ./miaoshuwuDownloader.py
 export PIP_DEFAULT_TIMEOUT=100
 ```
 
+## Lint & format & git hook
+
+```
+$ pre-commit install
+```

@@ -1,8 +1,6 @@
+Click==8.0.0
 beautifulsoup4==4.6.3
-blessings==1.7
-boltons==18.0.1
-Click==7.0
 html5lib==1.0.1
+boltons==18.0.1
 lxml==4.9.1
-six==1.11.0
-webencodings==0.5.1
+pre-commit==2.21.0
