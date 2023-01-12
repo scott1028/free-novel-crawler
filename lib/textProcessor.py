@@ -97,10 +97,17 @@ def main_handle(buf, treat_as_pure_text):
     # https://www.scivision.dev/hex-code-c2a0-non-breaking-space-markdown/
     buf = re.sub(r"(?:\t)+", "", buf, flags=re.MULTILINE)
 
-    # NOTE: remove duplicated tail symbol
+    # remove duplicated tail symbol
     buf = re.sub(r"((?:﹖|﹗|。|？|！|…))(?=\1)", "", buf, flags=re.DOTALL)
 
-    # NOTE: remove duplicated line wrap symbol
+    # add extra line wrap
+    buf = re.sub(r"((?:｢|「))", "\n\g<1>", buf, flags=re.DOTALL)
+    buf = re.sub(r"((?:｣|」))", "\g<1>\n", buf, flags=re.DOTALL)
+    buf = re.sub(r"((?:。){1}(?!｣|」))", "\g<1>\n", buf, flags=re.DOTALL)
+
+    buf = re.sub(r"((?:｣|｢){1})", "\g<1>\n", buf, flags=re.MULTILINE)
+
+    # remove duplicated line wrap symbol
     buf = re.sub(r"((?:\n))+", "\g<1>", buf, flags=re.DOTALL)
     return buf
 
