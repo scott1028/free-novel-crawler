@@ -4,3 +4,5 @@ html5lib==1.0.1
 boltons==18.0.1
 lxml==4.9.1
 pre-commit==2.21.0
+black=22.12.0
+
