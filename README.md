@@ -7,18 +7,9 @@ sudo apt-get install libxslt-dev python3-dev
 ## Usage
 
 ```
-find . -maxdepth 1 -name "done-*" | while read i; do mv "$i" "`echo "\"$i\"" | sed \"s/done-//g\"`"; done
-```
-
-- Fetch without proxy
-
-```
 ./miaoshuwuDownloader.py
-```
-
-- Fetch with proxy
-```
-PROXY=true ./miaoshuwuDownloader.py
+  ... or
+./8wenkuDownloader.py  
 ```
 
 - Load local file named ends with `*.txt` and skip file named starts with `done-*`.
@@ -26,11 +17,6 @@ PROXY=true ./miaoshuwuDownloader.py
 ```
 ./txtUtils.py
 ```
-
-## Plan
-
-- Refactor previous implementation with class base.
-- Refactor `lib/*`
 
 ## Troubleshooting
 
