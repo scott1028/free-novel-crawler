@@ -18,7 +18,8 @@ from lib import T
 @click.option(
     "--chapter_type", default="text", help="chapterType looked on line. DEFAULT=text"
 )
-def main(mode, chapter_type):
+@click.option("--ocr_mode", default="0", help="remove all line wrap. DEFAULT=0")
+def main(mode, chapter_type, ocr_mode):
     """A TXT CLI Tool for handling novel content."""
     txtencode = input("encoding?")
     concat = input("concat?").upper()
@@ -43,7 +44,10 @@ def main(mode, chapter_type):
                 buf = fd.read().decode(txtencode, "ignore")
                 LOG("[BUF][Start] %s" % len(buf))
                 buf = content_handle(
-                    buf, treat_as_pure_text=str(mode), chapterType=chapter_type
+                    buf,
+                    treat_as_pure_text=str(mode),
+                    chapterType=chapter_type,
+                    ocrMode=ocr_mode,
                 )
                 LOG("[BUF][End] %s" % len(buf))
                 if concat == "N":

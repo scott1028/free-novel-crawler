@@ -112,7 +112,7 @@ def main_handle(buf, treat_as_pure_text):
     return buf
 
 
-def post_handle(buf, chapterType):
+def post_handle(buf, chapterType, ocrMode):
     def chapter_handler(char):
         try:
             chapterNo = char.group("chapterNo")
@@ -136,14 +136,46 @@ def post_handle(buf, chapterType):
         buf = re.sub(pattern, chapter_handler, buf, flags=re.MULTILINE)
 
     # NOTE: add final wrap and avoid duplicated wrap at the end of content
-    return re.sub(r"((?:\r*\n))+$", "\n", buf, flags=re.MULTILINE)
+    output = re.sub(r"((?:\r*\n))+$", "\n", buf, flags=re.MULTILINE)
+
+    if ocrMode == "1":
+        output = re.sub(
+            r"^第(?P<chapterNum> \d+ )章\n",
+            r"@@@@第\g<chapterNum>章@@@@",
+            buf,
+            flags=re.MULTILINE,
+        )
+        prev = ""
+        curr = output
+        while prev != curr:
+            prev = curr
+            curr = re.sub(r"\n", "", curr)
+        output = curr
+        output = re.sub(
+            r"@@@@第(?P<chapterNum> \d+ )章@@@@",
+            r"\n\n第\g<chapterNum>章\n\n",
+            output,
+            flags=re.MULTILINE,
+        )
+        output = re.sub(
+            r"(?P<wrapWord>。)",
+            r"\g<wrapWord>\n",
+            output,
+            flags=re.MULTILINE,
+        )
+
+    return output
 
 
 def content_handle(
-    buf, treat_as_pure_text=os.environ.get("TXTMODE", "5").upper(), chapterType="text"
+    buf,
+    treat_as_pure_text=os.environ.get("TXTMODE", "5").upper(),
+    chapterType="text",
+    ocrMode="0",
 ):
     # https://docs.python.org/3/library/re.html#re.DOTALL
     buf = re.sub(r"(?:.)", filter_non_CJK_unicode, buf, flags=re.DOTALL)
     buf = main_handle(buf, treat_as_pure_text)
-    buf = post_handle(buf, chapterType)
+    buf = post_handle(buf, chapterType, ocrMode)
+
     return buf
