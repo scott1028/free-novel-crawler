@@ -140,7 +140,7 @@ def post_handle(buf, chapterType, ocrMode):
 
     if ocrMode == "1":
         output = re.sub(
-            r"^第(?P<chapterNum> \d+ )章\n",
+            r"^第(?P<chapterNum>(?: ){0,}\d+(?: ){0,})(?:章|話)\n",
             r"@@@@第\g<chapterNum>章@@@@",
             buf,
             flags=re.MULTILINE,
@@ -152,7 +152,7 @@ def post_handle(buf, chapterType, ocrMode):
             curr = re.sub(r"\n", "", curr)
         output = curr
         output = re.sub(
-            r"@@@@第(?P<chapterNum> \d+ )章@@@@",
+            r"@@@@第(?P<chapterNum>\d+)章@@@@",
             r"\n\n第\g<chapterNum>章\n\n",
             output,
             flags=re.MULTILINE,
