@@ -19,7 +19,12 @@ from lib import T
     "--chapter_type", default="text", help="chapterType looked on line. DEFAULT=text"
 )
 @click.option("--ocr_mode", default="0", help="remove all line wrap. DEFAULT=0")
-def main(mode, chapter_type, ocr_mode):
+@click.option(
+    "--auto_pagination",
+    default="0",
+    help="auto pagination charactors. DEFAULT=0. ex: 5000",
+)
+def main(mode, chapter_type, ocr_mode, auto_pagination):
     """A TXT CLI Tool for handling novel content."""
     txtencode = input("encoding?")
     concat = input("concat?").upper()
@@ -48,6 +53,7 @@ def main(mode, chapter_type, ocr_mode):
                     treat_as_pure_text=str(mode),
                     chapterType=chapter_type,
                     ocrMode=ocr_mode,
+                    autoPagination=auto_pagination,
                 )
                 LOG("[BUF][End] %s" % len(buf))
                 if concat == "N":

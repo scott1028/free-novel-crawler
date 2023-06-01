@@ -112,7 +112,7 @@ def main_handle(buf, treat_as_pure_text):
     return buf
 
 
-def post_handle(buf, chapterType, ocrMode):
+def post_handle(buf, chapterType, ocrMode, autoPagination):
     def chapter_handler(char):
         try:
             chapterNo = char.group("chapterNo")
@@ -158,12 +158,33 @@ def post_handle(buf, chapterType, ocrMode):
             flags=re.MULTILINE,
         )
         output = re.sub(
+            r"(?P<wrapWord1>)(?: )+(?P<wrapWord2>)",
+            r"\g<wrapWord1>\g<wrapWord2>",
+            output,
+            flags=re.MULTILINE,
+        )
+        output = re.sub(
             r"(?P<wrapWord>。)",
             r"\g<wrapWord>\n",
             output,
             flags=re.MULTILINE,
         )
-
+    if autoPagination != "0":
+        paginationPosList = []
+        paginationSize = int(autoPagination)
+        maxPos = len(output) - 1
+        currPos = paginationSize
+        while currPos < maxPos:
+            fragment = output[currPos : currPos + paginationSize]
+            paginationPosList.append(currPos + fragment.find("\n") + 1)
+            currPos += paginationSize
+        paginationPosList.append(currPos)
+        newOutput = ""
+        for idx, pos in enumerate(paginationPosList):
+            start = 0 if idx == 0 else paginationPosList[idx - 1]
+            end = pos
+            newOutput = newOutput + f"\n第{idx + 1}話\n\n" + output[start:end]
+        return newOutput
     return output
 
 
@@ -172,10 +193,11 @@ def content_handle(
     treat_as_pure_text=os.environ.get("TXTMODE", "5").upper(),
     chapterType="text",
     ocrMode="0",
+    autoPagination="0",
 ):
     # https://docs.python.org/3/library/re.html#re.DOTALL
     buf = re.sub(r"(?:.)", filter_non_CJK_unicode, buf, flags=re.DOTALL)
     buf = main_handle(buf, treat_as_pure_text)
-    buf = post_handle(buf, chapterType, ocrMode)
+    buf = post_handle(buf, chapterType, ocrMode, autoPagination)
 
     return buf
