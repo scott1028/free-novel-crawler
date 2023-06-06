@@ -93,6 +93,7 @@ def main_handle(buf, treat_as_pure_text):
     # remove weird space symbol
     buf = re.sub(r"(?:\xc2|\xa0)+", " ", buf, flags=re.DOTALL)
     buf = re.sub(r"^ +", "", buf, flags=re.MULTILINE)
+    buf = re.sub(r"^ +", "", buf, flags=re.MULTILINE)
     buf = re.sub(r" +$", "", buf, flags=re.MULTILINE)
     # https://www.scivision.dev/hex-code-c2a0-non-breaking-space-markdown/
     buf = re.sub(r"(?:\t)+", "", buf, flags=re.MULTILINE)
