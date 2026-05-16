@@ -1,3 +1,5 @@
+# This project is deprecated. Go to https://github.com/scott1028/free-novel-crawler-js
+
 ## Prerequisite
 
 ```
